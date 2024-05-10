@@ -1,0 +1,73 @@
+---
+- name: Configure EIGRP on Router
+  hosts: R1
+  gather_facts: no
+  vars:
+    router_hostname: R1
+    router_ssh_user: R1
+    router_ssh_pass: adnan
+    router_enable_pass: adnan
+    router_linux_ip: 192.168.10.12
+    router_linux_subnet: 255.255.255.0
+    linux_router_ip: 192.168.10.11
+    linux_router_subnet: 255.255.255.0
+  tasks:
+    - name: Ensure SSH access is enabled
+      ios_config:
+        lines:
+          - "ip ssh version 2"
+          - "line vty 0 4"
+          - "transport input ssh"
+      vars:
+        ansible_connection: network_cli
+        ansible_network_os: ios
+        ansible_user: "{{ router_ssh_user }}"
+        ansible_password: "{{ router_ssh_pass }}"
+        ansible_become: yes
+        ansible_become_method: enable
+        ansible_become_password: "{{ router_enable_pass }}"
+
+    - name: Configure router hostname
+      ios_config:
+        lines:
+          - "hostname {{ router_hostname }}"
+      vars:
+        ansible_connection: network_cli
+        ansible_network_os: ios
+        ansible_user: "{{ router_ssh_user }}"
+        ansible_password: "{{ router_ssh_pass }}"
+        ansible_become: yes
+        ansible_become_method: enable
+        ansible_become_password: "{{ router_enable_pass }}"
+
+    - name: Configure router interfaces
+      ios_config:
+        lines:
+          - "interface GigabitEthernet0/0"
+          - "ip address {{ router_linux_ip }} {{ router_linux_subnet }}"
+          - "description Connection to Linux"
+          - "interface ens3"
+          - "ip address {{ linux_router_ip }} {{ linux_router_subnet }}"
+          - "description Connection to Linux"
+      vars:
+        ansible_connection: network_cli
+        ansible_network_os: ios
+        ansible_user: "{{ router_ssh_user }}"
+        ansible_password: "{{ router_ssh_pass }}"
+        ansible_become: yes
+        ansible_become_method: enable
+        ansible_become_password: "{{ router_enable_pass }}"
+
+    - name: Configure EIGRP
+      ios_config:
+        lines:
+          - "router eigrp 10"
+          - "network 192.168.10.0 0.0.0.255"
+      vars:
+        ansible_connection: network_cli
+        ansible_network_os: ios
+        ansible_user: "{{ router_ssh_user }}"
+        ansible_password: "{{ router_ssh_pass }}"
+        ansible_become: yes
+        ansible_become_method: enable
+        ansible_become_password: "{{ router_enable_pass }}"

@@ -1,0 +1,31 @@
+---
+- name: Configure EIGRP on routers
+  hosts: R1
+  gather_facts: no
+  tasks:
+    - name: Ensure EIGRP is enabled
+      ios_config:
+        lines:
+          - router eigrp 100
+        provider:
+          username: R1
+          password: adnan
+          host: 192.168.10.12
+          authorize: yes
+          auth_pass: adnan
+        register: enable_eigrp_result
+
+    - name: Configure EIGRP network
+      ios_config:
+        lines:
+          - network 192.168.10.0
+        provider:
+          username: R1
+          password: adnan
+          host: 192.168.10.12
+          authorize: yes
+          auth_pass: adnan
+        when: enable_eigrp_result.changed
+
+    # Add more tasks as needed for additional configuration
+
