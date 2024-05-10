@@ -1,15 +1,12 @@
 pipeline {
     agent any
 
-    tools {
-        ansible 'Ansible' // Ensure Ansible is defined in Jenkins global tool configuration
-    }
-
     stages {
         stage('Checkout Code') {
             steps {
                 // Checkout your GitHub repository
-                git 'https://github.com/YourUsername/router.git' // Replace with your actual repository URL
+                git credentialsId: '541f9d19-c79f-49fb-9ad7-65dfbd124708',
+                 url: 'https://github.com/AdnanTheGreekGod/router.git'
             }
         }
         stage('Run Tests') {
@@ -18,25 +15,16 @@ pipeline {
                 ansiblePlaybook(
                     playbook: 'eigrp_config.yml', 
                     inventory: 'hosts', 
-                    extras: '--check --diff' // Dry run to simulate changes without making them
                 )
             }
         }
         stage('Deploy') {
             steps {
-                // Deploy the actual playbook to configure devices
                 ansiblePlaybook(
                     playbook: 'eigrp_config.yml',
                     inventory: 'hosts'
                 )
             }
-        }
-    }
-    post {
-        always {
-            // Notification, cleanup, or other post-processing actions
-            echo 'Pipeline execution completed'
-            mail bcc: '', cc: '', subject: 'EIGRP Configuration Deployment', to: 'your-email@example.com', body: "The EIGRP configuration deployment is complete. Check Jenkins for details."
         }
     }
 }
